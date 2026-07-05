@@ -9,16 +9,25 @@ import 'package:peng_houth_cycle/features/auth/presentation/providers/auth_provi
 import 'package:peng_houth_cycle/features/home/data/repositories/station_repository.dart';
 import 'package:peng_houth_cycle/features/home/data/services/station_service.dart';
 import 'package:peng_houth_cycle/features/home/presentation/providers/home_provider.dart';
+import 'package:peng_houth_cycle/features/rental/data/repositories/rental_repositoty.dart';
+import 'package:peng_houth_cycle/features/rental/data/services/rental_service.dart';
+import 'package:peng_houth_cycle/features/rental/presentation/providers/rental_provider.dart';
 import 'package:provider/provider.dart';
 
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final apiClient = ApiClient();
+  final storage = LocalStorage();
+
   final authRepository = AuthRepository(
     AuthApiService(apiClient),
     apiClient,
     LocalStorage(),
+  );
+  final rentalRepository = RentalRepository(
+    RentalApiService(apiClient),
+    storage,
   );
 
   runApp(
@@ -32,6 +41,9 @@ Future<void> bootstrap() async {
           create: (_) =>
               HomeProvider(StationRepository(StationApiService(apiClient)))
                 ..loaded(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RentalProvider(rentalRepository)..restore(),
         ),
       ],
       child: const App(),

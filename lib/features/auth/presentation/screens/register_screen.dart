@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:peng_houth_cycle/core/enum/app_state.dart';
+import 'package:peng_houth_cycle/core/widgets/app_button.dart';
+import 'package:peng_houth_cycle/core/widgets/app_textfield.dart';
 import 'package:peng_houth_cycle/features/auth/presentation/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -59,43 +61,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Row(
             children: [
               Expanded(
-                child: TextField(
+                child: AppTextField(
                   controller: _firstnameController,
-                  decoration: const InputDecoration(labelText: 'First name'),
+                  label: 'First name',
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: TextField(
+                child: AppTextField(
                   controller: _lastnameController,
-                  decoration: const InputDecoration(labelText: 'Last name'),
+                  label: 'Last name',
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          TextField(
+          AppTextField(
             controller: _emailController,
+            label: 'Email',
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Email'),
           ),
           const SizedBox(height: 12),
-          TextField(
+          AppTextField(
             controller: _phoneController,
+            label: 'Phone',
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(labelText: 'Phone'),
           ),
           const SizedBox(height: 12),
-          TextField(
+          AppTextField(
             controller: _passwordController,
-            obscureText: true,
-            decoration: const InputDecoration(labelText: 'Password'),
+            label: 'Password',
+            isPassword: true,
           ),
           const SizedBox(height: 12),
-          TextField(
+          AppTextField(
             controller: _confirmController,
-            obscureText: true,
-            decoration: const InputDecoration(labelText: 'Confirm password'),
+            label: 'Confirm password',
+            isPassword: true,
           ),
           const SizedBox(height: 8),
           if (provider.state == AppState.error)
@@ -104,15 +106,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               style: const TextStyle(color: Colors.red),
             ),
           const SizedBox(height: 16),
-          FilledButton(
-            onPressed: isLoading ? null : _submit,
-            child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Create account'),
+          AppButton(
+            'Create account',
+            isLoading: isLoading,
+            onTap: isLoading ? null : _submit,
           ),
         ],
       ),

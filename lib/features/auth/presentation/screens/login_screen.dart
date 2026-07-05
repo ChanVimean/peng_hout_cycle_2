@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:peng_houth_cycle/core/enum/app_state.dart';
+import 'package:peng_houth_cycle/core/widgets/app_button.dart';
+import 'package:peng_houth_cycle/core/widgets/app_textfield.dart';
 import 'package:peng_houth_cycle/features/auth/presentation/providers/auth_provider.dart';
 import 'package:peng_houth_cycle/features/auth/presentation/screens/register_screen.dart';
 import 'package:provider/provider.dart';
@@ -40,18 +42,18 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
+          spacing: 8,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
+            AppTextField(
               controller: _emailController,
+              label: 'Email',
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email'),
             ),
-            const SizedBox(height: 12),
-            TextField(
+            AppTextField(
               controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
+              label: 'Password',
+              isPassword: true,
             ),
             const SizedBox(height: 8),
             if (provider.state == AppState.error)
@@ -60,24 +62,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: const TextStyle(color: Colors.red),
               ),
             const SizedBox(height: 16),
-            FilledButton(
-              onPressed: isLoading ? null : _submit,
-              child: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Login'),
+            AppButton(
+              'Login',
+              isLoading: isLoading,
+              onTap: isLoading ? null : _submit,
             ),
-            TextButton(
-              onPressed: isLoading
+            AppButton(
+              'Register',
+              variant: ButtonVariant.text,
+              onTap: isLoading
                   ? null
                   : () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const RegisterScreen()),
                     ),
-              child: const Text("Don't have an account? Register"),
             ),
           ],
         ),

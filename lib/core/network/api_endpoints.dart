@@ -11,4 +11,8 @@ class ApiEndpoints {
   // Auth
   static const String register = '/auth/register';
   static const String login = '/auth/login';
+
+  // Rental
+  static const String rentals = '/rentals';
+  static String returnRental(int id) => '/rentals/$id/return';
 }

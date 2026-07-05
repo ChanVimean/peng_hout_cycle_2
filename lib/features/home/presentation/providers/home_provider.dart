@@ -5,6 +5,7 @@ import 'package:peng_houth_cycle/core/enum/app_state.dart';
 import 'package:peng_houth_cycle/features/home/data/models/station_model.dart';
 import 'package:peng_houth_cycle/features/home/data/repositories/station_repository.dart';
 import 'package:peng_houth_cycle/features/home/presentation/helpers/home_open_station_helper.dart';
+import 'package:peng_houth_cycle/features/home/presentation/helpers/station_marker_icon.dart';
 
 class HomeProvider extends ChangeNotifier {
   HomeProvider(this._repository);
@@ -31,6 +32,10 @@ class HomeProvider extends ChangeNotifier {
   List<StationModel> _stations = [];
   List<StationModel> get stations => _stations;
 
+  /// Cached labeled marker icons, keyed by "id-status" so an icon is only
+  /// rebuilt when its station's name or color could have changed.
+  final Map<String, BitmapDescriptor> _markerIcons = {};
+
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
@@ -45,6 +50,7 @@ class HomeProvider extends ChangeNotifier {
       _stations = await _repository.getStations();
       _state = AppState.success;
       fitToStations();
+      await _buildMarkerIcons();
     } catch (e) {
       _errorMessage = e.toString();
       _state = AppState.error;
@@ -101,24 +107,46 @@ class HomeProvider extends ChangeNotifier {
     controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 60));
   }
 
+  String _iconKey(StationModel s) => '${s.id}-${s.status}';
+
+  Color _statusColor(StationModel s) =>
+      s.status == 'normal' ? const Color(0xFF2E7D32) : const Color(0xFFC62828);
+
+  /// Rasterizes a labeled marker icon for every station, caching by [_iconKey].
+  /// Only stations without a cached icon are (re)built, then listeners are
+  /// notified so the map rebuilds its markers with the finished bitmaps.
+  Future<void> _buildMarkerIcons() async {
+    var built = false;
+    for (final station in _stations) {
+      final key = _iconKey(station);
+      if (_markerIcons.containsKey(key)) continue;
+      _markerIcons[key] = await createStationMarkerBitmap(
+        label: station.name,
+        color: _statusColor(station),
+      );
+      built = true;
+    }
+    if (built) notifyListeners();
+  }
+
   Set<Marker> buildMarkers(
     BuildContext context, {
     required List<StationModel> stations,
   }) {
     return stations.map((stationModel) {
+      final icon = _markerIcons[_iconKey(stationModel)];
       return Marker(
         onTap: () => homeOpenStationHelper(context, stationModel: stationModel),
         markerId: MarkerId(stationModel.id.toString()),
         position: LatLng(stationModel.latitude, stationModel.longitude),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          stationModel.status == 'normal'
-              ? BitmapDescriptor.hueGreen
-              : BitmapDescriptor.hueRed,
-        ),
-        infoWindow: InfoWindow(
-          title: stationModel.name,
-          snippet: '${stationModel.bikesCount}/${stationModel.capacity} bikes',
-        ),
+        // Fall back to a plain colored pin until the labeled bitmap is ready.
+        icon:
+            icon ??
+            BitmapDescriptor.defaultMarkerWithHue(
+              stationModel.status == 'normal'
+                  ? BitmapDescriptor.hueGreen
+                  : BitmapDescriptor.hueRed,
+            ),
       );
     }).toSet();
   }

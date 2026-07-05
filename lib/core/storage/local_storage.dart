@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalStorage {
   static const _tokenKey = 'auth_token';
   static const _userKey = 'auth_user';
+  static const _rentalKey = 'active_rental_id';
 
   Future<void> saveSession({
     required String token,
@@ -27,5 +28,20 @@ class LocalStorage {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
     await prefs.remove(_userKey);
+  }
+
+  Future<void> saveActiveRentalId(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_rentalKey, id);
+  }
+
+  Future<int?> readActiveRentalId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_rentalKey);
+  }
+
+  Future<void> clearActiveRentalId() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_rentalKey);
   }
 }
